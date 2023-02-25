@@ -23,8 +23,20 @@ def get_id_emb(id_net, id_img):
 
     return id_emb, id_feature
 
-
 def video_test(args):
+    '''
+    def video_test(args):  This function is used to test the model on a video.
+    
+    It takes in the following arguments:
+        args.source_img_path: path to the source image
+        args.target_video_path: path to the target video
+        args.output_path: path to the output videos
+        args.image_size: size of the test images (224 SimSwap | 256 FaceShifter)
+        args.merge_result: output with whole image
+        args.use_gpu: use gpu or not
+
+    It returns nothing, but saves the result video in the output path.
+    '''
 
     paddle.set_device("gpu" if args.use_gpu else 'cpu')
     faceswap_model = FaceSwap(args.use_gpu)
@@ -84,7 +96,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_path', type=str, default='results', help='path to the output videos')
     parser.add_argument('--image_size', type=int, default=224,help='size of the test images (224 SimSwap | 256 FaceShifter)')
     parser.add_argument('--merge_result', type=bool, default=True, help='output with whole image')
-    parser.add_argument('--use_gpu', type=bool, default=False)
+    parser.add_argument('--use_gpu', type=bool, default=True)
 
     args = parser.parse_args()
     video_test(args)

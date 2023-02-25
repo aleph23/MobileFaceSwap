@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 
-
 def align_with_five_points(src_points, size=224):
 
     REFERENCE_FACIAL_POINTS = [
@@ -14,7 +13,6 @@ def align_with_five_points(src_points, size=224):
     REFERENCE_FACIAL_POINTS = np.array(REFERENCE_FACIAL_POINTS)
     REFERENCE_FACIAL_POINTS[:, 0] += 8
     REFERENCE_FACIAL_POINTS *= size / 112.0
-
 
     dst_points = REFERENCE_FACIAL_POINTS
     # align dst to src
@@ -41,7 +39,6 @@ def align_with_five_points(src_points, size=224):
         ])
     return tfm
 
-
 def back_matrix(affine_matrix):
     back_matrix = np.zeros((3, 3))
     back_matrix[0:2, :] = affine_matrix
@@ -50,13 +47,10 @@ def back_matrix(affine_matrix):
     back_matrix = back_matrix[0:2, :]
     return back_matrix
 
-
 def align_img(img, src_lmks, size=224):
     M = align_with_five_points(src_lmks, size)
     aligned_img = cv2.warpAffine(img, M, (size, size), flags=cv2.INTER_LINEAR)
     return aligned_img, back_matrix(M[:2])
-
-
 
 def dealign(generated, origin, back_affine_matrix,  mask):
     kernel = cv2.getStructuringElement(shape=cv2.MORPH_RECT,ksize=(11,11))
@@ -64,7 +58,6 @@ def dealign(generated, origin, back_affine_matrix,  mask):
     mask[mask > 0.001] = 1.0
     mask = cv2.dilate(mask, kernel)
     mask = cv2.erode(mask,kernel,iterations=2)
-
     mask = cv2.blur(mask,(7,7))
 
     mask_1 = np.zeros_like(mask, dtype=np.float32)
@@ -76,9 +69,7 @@ def dealign(generated, origin, back_affine_matrix,  mask):
     mask = cv2.warpAffine(mask, back_affine_matrix, (origin.shape[1], origin.shape[0]))
 
     mask = mask[..., np.newaxis]
-
     dealigned_img = target_image * mask + origin * (1 - mask)
-
     dealigned_img = dealigned_img.clip(0, 255.0).astype(np.uint8)
     
     return dealigned_img
