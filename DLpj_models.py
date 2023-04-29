@@ -24,7 +24,7 @@ def detection(img):
   faces = faces.permute(0, 3, 1, 2)
   faces = faces.float()
   #bboxes = [float(num) for num in bboxes]
-  return faces, bboxes, points
+  return faces, bboxes, points[0]
 
 
 def get_embeddings(faces):
@@ -122,10 +122,11 @@ def preprocess(img, target, recog_thr, version) :
 def k(img, points, face_ids):
   point_list = []
 
-  for (point, face_id) in zip(points[0], face_ids):
+  for (point, face_id) in zip(points, face_ids):
     if face_id == 'unknown':
-        point_list.append(points)
+        point_list.append(point)
 
+  point_list = np.array(point_list)  
   return point_list
 
 
