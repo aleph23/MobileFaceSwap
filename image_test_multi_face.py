@@ -9,6 +9,8 @@ from models.arcface import IRBlock, ResNet
 from utils.align_face import back_matrix, dealign, align_img
 from utils.util import paddle2cv, cv2paddle
 from utils.prepare_data import LandmarkModel
+from DLpj_models import process_image
+import pickle
 
 def get_id_emb(id_net, id_img_path):
     id_img = cv2.imread(id_img_path)
@@ -118,9 +120,27 @@ def faces_align(landmarkModel, image_path, image_size=224):
     return aligned_imgs
 
 
+def faces_align_(target, image_path, image_size=224):
+    aligned_imgs =[]
+    if os.path.isfile(image_path):
+        img_list = [image_path]
+    else:
+        img_list = [os.path.join(image_path, x) for x in os.listdir(image_path) if x.endswith('png') or x.endswith('jpg') or x.endswith('jpeg')]
+    for path in img_list:
+        img = cv2.imread(path)
+        landmarks = process_image(img, target)
+        for landmark in landmarks:
+            if landmark is not None:
+                aligned_img, back_matrix = align_img(img, landmark, image_size)
+                aligned_imgs.append([aligned_img, back_matrix])
+    return aligned_imgs
+
+
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="MobileFaceSwap Test")
+    parser.add_argument('--target_path', type=str, help='path to the target vector')
     parser.add_argument('--source_img_path', type=str, help='path to the source image')
     parser.add_argument('--target_img_path', type=str, help='path to the target images')
     parser.add_argument('--output_dir', type=str, default='results', help='path to the output dirs')
@@ -130,17 +150,28 @@ if __name__ == '__main__':
     parser.add_argument('--use_gpu', type=bool, default=False)
 
 
+    # args = parser.parse_args()
+    # if args.need_align:
+    #     landmarkModel = LandmarkModel(name='landmarks')
+    #     landmarkModel.prepare(ctx_id= 0, det_thresh=0.6, det_size=(640,640))
+    #     source_aligned_images = faces_align(landmarkModel, args.source_img_path)
+    #     target_aligned_images = faces_align(landmarkModel, args.target_img_path, args.image_size)
+    # os.makedirs(args.output_dir, exist_ok=True)
+    # image_test_multi_face(args, source_aligned_images, target_aligned_images)
+
+
     args = parser.parse_args()
+
+    
+    with open(args.target_path, "rb") as fr:
+        target = pickle.load(fr)
+
     if args.need_align:
         landmarkModel = LandmarkModel(name='landmarks')
         landmarkModel.prepare(ctx_id= 0, det_thresh=0.6, det_size=(640,640))
         source_aligned_images = faces_align(landmarkModel, args.source_img_path)
-        target_aligned_images = faces_align(landmarkModel, args.target_img_path, args.image_size)
+        target_aligned_images = faces_align_(target, args.target_img_path, args.image_size)
     os.makedirs(args.output_dir, exist_ok=True)
     image_test_multi_face(args, source_aligned_images, target_aligned_images)
-
-
-
-
 
 
