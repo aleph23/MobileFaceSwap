@@ -130,7 +130,8 @@ def k(img, points, face_ids):
 
 def process_image(img, target, recog_thr=0.6, version=1, view_sim=False): 
     _, bboxes, points = detection(img)
-    face_ids, prob = preprocess(img, target, recog_thr, version)
+    print("bboxes is", bboxes)
+    face_ids, _ = preprocess(img, target, recog_thr, version)
     result = k(img, points, face_ids)
     print("k is", result)
 
