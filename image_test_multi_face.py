@@ -133,6 +133,8 @@ def faces_align_(target, image_path, image_size=224):
             if landmark is not None:
                 aligned_img, back_matrix = align_img(img, landmark, image_size)
                 aligned_imgs.append([aligned_img, back_matrix])
+
+    print("HIHI: ", aligned_imgs)
     return aligned_imgs
 
 
@@ -162,7 +164,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    
+
     with open(args.target_path, "rb") as fr:
         target = pickle.load(fr)
 
