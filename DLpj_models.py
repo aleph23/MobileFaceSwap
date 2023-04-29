@@ -121,7 +121,7 @@ def preprocess(img, target, recog_thr, version) :
 def k(img, points, face_ids, image_size=224):
   aligned_imgs =[]
 
-  for (point, face_id) in (points, face_ids):
+  for (point, face_id) in zip(points, face_ids):
     if face_id == 'unknown':
       aligned_img, back_matrix = align_img(img, point, image_size)
       aligned_imgs.append([aligned_img, back_matrix])
