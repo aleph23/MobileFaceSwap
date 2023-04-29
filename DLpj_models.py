@@ -121,14 +121,14 @@ def preprocess(img, target, recog_thr, version) :
 def k(img, points, face_ids):
   point_list = []
 
-  for (point, face_id) in zip(points, face_ids):
+  for (point, face_id) in zip(points[0], face_ids):
     if face_id == 'unknown':
         point_list.append(points)
 
   return point_list
 
 
-def process_image(img, target, recog_thr=0.6, version=1, view_sim=False): 
+def process_image(img, target, recog_thr=0.42, version=3, view_sim=False): 
     _, bboxes, points = detection(img)
     print("bboxes is", bboxes)
     print("points is", points)
