@@ -105,7 +105,7 @@ def recognition_v3(face_db, unknown_embeddings, recog_thr) :
 
 
 def preprocess(img, target, recog_thr, version) :
-  faces, bboxes = detection(img)
+  faces, bboxes, _ = detection(img)
 
   unknown_embeddings = get_embeddings(faces)
   if version == 1:
