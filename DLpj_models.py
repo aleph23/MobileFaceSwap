@@ -2,6 +2,7 @@ from facenet_pytorch import InceptionResnetV1
 from face_detector import YoloDetector
 import cv2
 import torch
+import numpy as np
 from utils.align_face import align_img
 
 
