@@ -1,5 +1,5 @@
 from facenet_pytorch import InceptionResnetV1
-from yoloface.face_detector import YoloDetector
+from face_detector import YoloDetector
 import cv2
 import torch
 from utils.align_face import align_img
