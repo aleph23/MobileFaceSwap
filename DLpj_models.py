@@ -118,21 +118,21 @@ def preprocess(img, target, recog_thr, version) :
   return face_ids, probs
 
 
-def k(img, points, face_ids, image_size=224):
-  aligned_imgs =[]
+def k(img, points, face_ids):
+  point_list = []
 
   for (point, face_id) in zip(points, face_ids):
     if face_id == 'unknown':
-      aligned_img, back_matrix = align_img(img, point, image_size)
-      aligned_imgs.append([aligned_img, back_matrix])
+        point_list.append(points)
 
-  return aligned_imgs
+  return point_list
 
 
 def process_image(img, target, recog_thr=0.6, version=1, view_sim=False): 
     _, bboxes, points = detection(img)
     face_ids, prob = preprocess(img, target, recog_thr, version)
     result = k(img, points, face_ids)
+    print("k is", result)
 
     return result
 
