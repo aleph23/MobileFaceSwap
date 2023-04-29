@@ -12,11 +12,11 @@ import warnings
 
 from math import sqrt
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname("__file__"), '..')))
-from yoloface.models.common import Conv
-from yoloface.models.yolo import Model
-from yoloface.utils.datasets import letterbox
-from yoloface.utils.preprocess_utils import align_faces
-from yoloface.utils.general import check_img_size, non_max_suppression_face, \
+from models.common import Conv
+from models.yolo import Model
+from utils.datasets import letterbox
+from utils.preprocess_utils import align_faces
+from utils.general import check_img_size, non_max_suppression_face, \
     scale_coords,scale_coords_landmarks,filter_boxes
 
 class YoloDetector:
