@@ -117,6 +117,9 @@ def faces_align(landmarkModel, image_path, image_size=224):
             if landmark is not None:
                 aligned_img, back_matrix = align_img(img, landmark, image_size)
                 aligned_imgs.append([aligned_img, back_matrix])
+    
+        print("landmarks is ", landmarks)
+    print("aligned_img is", aligned_imgs)
     return aligned_imgs
 
 
@@ -134,7 +137,8 @@ def faces_align_(target, image_path, image_size=224):
                 aligned_img, back_matrix = align_img(img, landmark, image_size)
                 aligned_imgs.append([aligned_img, back_matrix])
 
-    print("HIHI: ", aligned_imgs)
+        print("new landmarks is", landmarks)
+    print("new aligned_img is ", aligned_imgs)
     return aligned_imgs
 
 
