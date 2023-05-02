@@ -14,18 +14,42 @@ resnet = InceptionResnetV1(pretrained='vggface2', device=device).eval()
 model = YoloDetector(target_size = 720, device = "cuda:0",min_face = 20)
 
 
-def detection(img):
+# def detection(img):
+#   bboxes, points = model.predict(img)
+#   # crop and align image
+#   faces = model.align(img, points[0])
+
+#   # Reshape tensor for resnet module
+#   faces = torch.tensor(faces)
+#   faces = faces.permute(0, 3, 1, 2)
+#   faces = faces.float()
+#   #bboxes = [float(num) for num in bboxes]
+#   return faces, bboxes, points[0]
+
+def detection(img, show=False, save_path=None, img_num=None):
   bboxes, points = model.predict(img)
   # crop and align image
   faces = model.align(img, points[0])
-
+  # show pictures
+  if show == True:
+    for face in faces:
+      cv2_imshow(face)  
+  # save pictures
+  if save_path != None:
+    for i in range(len(faces)):
+      img = faces[i]
+      img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+      img = Image.fromarray(img)
+      img.save(save_path + f'/crop{img_num}_{i}.png')     
   # Reshape tensor for resnet module
   faces = torch.tensor(faces)
-  faces = faces.permute(0, 3, 1, 2)
-  faces = faces.float()
+  if faces.dim() == 4:
+    faces = faces.permute(0, 3, 1, 2)
+    faces = faces.float()
   #bboxes = [float(num) for num in bboxes]
-  return faces, bboxes, points[0]
-
+    return faces, bboxes, points
+  else:
+    return None, None, None
 
 def get_embeddings(faces):
     faces = faces.to(device)
