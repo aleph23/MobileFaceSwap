@@ -186,17 +186,16 @@ class Tuning(nn.Module):
     x = resnet(x)
     x = self.classifier(x)
     return x
+  
+model_dl = torch.load("model_v1.pt", map_location=device)
+model_dl.eval()
 
-def process_image_dl(img, DL_path): 
+def process_image_dl(img): 
     data_transform = T.Compose([
         T.ToTensor(),
         T.Resize(244),
         T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
-
-    model_dl = torch.load(DL_path, map_location=device)
-    model_dl.eval()
-
     
     imgs, _, points = detection(img)
     crop_img_list = []
