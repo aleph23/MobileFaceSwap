@@ -18,8 +18,8 @@ def align_with_five_points(src_points, size=224):
 
     dst_points = REFERENCE_FACIAL_POINTS
     # align dst to src
-    src_pts = np.matrix(src_points.astype(np.float32))
-    dst_pts = np.matrix(dst_points.astype(np.float32))
+    src_pts = np.matrix(src_points.astype(np.float64))
+    dst_pts = np.matrix(dst_points.astype(np.float64))
 
     tfm = np.float32([[1, 0, 0], [0, 1, 0]])
     n_pts = src_pts.shape[0]
