@@ -156,9 +156,9 @@ def k(img, points, face_ids):
 
 
 def process_image(img, target, recog_thr=0.4, version=1, view_sim=False): 
-    _, bboxes, points = detection(img)
+    _, _, points = detection(img)
     face_ids, _ = preprocess(img, target, recog_thr, version)
-    result = k(img, points, face_ids)
+    result = k(img, points[0], face_ids)
 
     return result
 
@@ -197,7 +197,7 @@ def process_image_dl(img, DL_path):
     model_dl.eval()
 
     
-    imgs, bboxes, points = detection(img)
+    imgs, _, points = detection(img)
     crop_img_list = []
     for i in imgs:
       i = T.ToPILImage()(i)
@@ -216,7 +216,7 @@ def process_image_dl(img, DL_path):
       if i == max_row_index:
         face_ids.append("charm_zu")
 
-    result = k(img, points, face_ids)
+    result = k(img, points[0], face_ids)
 
 
     return result
