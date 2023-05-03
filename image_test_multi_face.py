@@ -11,6 +11,7 @@ from utils.util import paddle2cv, cv2paddle
 from utils.prepare_data import LandmarkModel
 from DLpj_models import process_image, process_image_dl
 import pickle
+import torch
 import torch.nn as nn
 from facenet_pytorch import InceptionResnetV1
 
