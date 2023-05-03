@@ -14,7 +14,7 @@ import pickle
 import torch.nn as nn
 from facenet_pytorch import InceptionResnetV1
 
-
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 resnet = InceptionResnetV1(pretrained='vggface2', device=device).eval()
 
 class Tuning(nn.Module):
