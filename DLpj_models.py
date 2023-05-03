@@ -4,7 +4,8 @@ import cv2
 import torch
 import numpy as np
 from utils.align_face import align_img
-
+import torch.nn as nn
+import torchvision.transforms as T
 
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -162,3 +163,62 @@ def process_image(img, target, recog_thr=0.4, version=1, view_sim=False):
     return result
 
 
+
+
+############################################ 수정
+
+#defining the network
+
+class Tuning(nn.Module):
+
+  def __init__(self):
+    super(Tuning,self).__init__()
+    self.classifier = nn.Sequential(
+            nn.Linear(512, 128),
+            nn.ReLU(inplace=True),
+            nn.Dropout(),
+            nn.Linear(128, 2),
+            nn.Softmax(dim=1)
+
+    )
+
+  def forward(self,x):
+    x = resnet(x)
+    x = self.classifier(x)
+    return x
+
+def process_image_dl(img, DL_path): 
+    results=[]
+    data_transform = T.Compose([
+        T.ToTensor(),
+        T.Resize(244),
+        T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+
+    model_dl = torch.load(DL_path, map_location=device)
+    model_dl.eval()
+
+    
+    imgs, bboxes, points = detection(img)
+    crop_img_list = []
+    for i in imgs:
+      i = T.ToPILImage()(i)
+      crop_img_list.append(data_transform(i))
+
+    crop_img_tensor = torch.stack(crop_img_list, dim=0)
+    crop_img_tensor = crop_img_tensor.to(device)
+    output = model_dl(crop_img_tensor)
+    max_row_index = torch.argmax(output[:, 0])
+
+    face_ids = []
+
+    for i in range(len(output)):
+      if i != max_row_index:
+        face_ids.append("unknown")
+      if i == max_row_index:
+        face_ids.append("charm_zu")
+
+    result = k(img, points, face_ids)
+
+
+    return result
