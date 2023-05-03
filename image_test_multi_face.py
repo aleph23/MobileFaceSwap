@@ -85,7 +85,8 @@ def image_test_multi_face(args, source_aligned_images, target_aligned_images):
             mask = np.transpose(mask[0].numpy(), (1, 2, 0))
             res = dealign(res, origin_att_img, back_matrix, mask)
             '''
-        cv2.imwrite(os.path.join(args.output_dir, os.path.basename(target_name.format(idx))), origin_att_img)
+    cv2.imwrite(os.path.join(args.output_dir, os.path.basename(target_name)), origin_att_img)
+    # cv2.imwrite(os.path.join(args.output_dir, os.path.basename(target_name.format(idx))), origin_att_img)
 
 
 def face_align(landmarkModel, image_path, merge_result=False, image_size=224):
