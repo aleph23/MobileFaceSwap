@@ -11,6 +11,30 @@ from utils.util import paddle2cv, cv2paddle
 from utils.prepare_data import LandmarkModel
 from DLpj_models import process_image, process_image_dl
 import pickle
+import torch.nn as nn
+from facenet_pytorch import InceptionResnetV1
+
+
+resnet = InceptionResnetV1(pretrained='vggface2', device=device).eval()
+
+class Tuning(nn.Module):
+
+  def __init__(self):
+    super(Tuning,self).__init__()
+    self.classifier = nn.Sequential(
+            nn.Linear(512, 128),
+            nn.ReLU(inplace=True),
+            nn.Dropout(),
+            nn.Linear(128, 2),
+            nn.Softmax(dim=1)
+
+    )
+
+  def forward(self,x):
+    x = resnet(x)
+    x = self.classifier(x)
+    return x
+  
 
 def get_id_emb(id_net, id_img_path):
     id_img = cv2.imread(id_img_path)
