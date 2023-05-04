@@ -171,21 +171,22 @@ def process_image(img, target, recog_thr=0.4, version=1, view_sim=False):
 
 class Tuning(nn.Module):
 
-  def __init__(self):
-    super(Tuning,self).__init__()
-    self.classifier = nn.Sequential(
-            nn.Linear(512, 128),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(128, 2),
-            nn.Softmax(dim=1)
+    def __init__(self):
+        super(Tuning,self).__init__()
+        self.classifier = nn.Sequential(
+                nn.Linear(512, 128),
+                nn.ReLU(inplace=True),
+                nn.Dropout(),
+                nn.Linear(128, 2),
+                nn.Softmax(dim=1)
 
     )
 
-  def forward(self,x):
+    def forward(self,x):
     x = resnet(x)
     x = self.classifier(x)
     return x
+
 
 path =  os.getcwd() + "/model_v1.pt"
 

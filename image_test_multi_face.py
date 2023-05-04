@@ -15,27 +15,29 @@ import torch
 import torch.nn as nn
 from facenet_pytorch import InceptionResnetV1
 
+
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 resnet = InceptionResnetV1(pretrained='vggface2', device=device).eval()
 
+
 class Tuning(nn.Module):
 
-  def __init__(self):
-    super(Tuning,self).__init__()
-    self.classifier = nn.Sequential(
-            nn.Linear(512, 128),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(128, 2),
-            nn.Softmax(dim=1)
+    def __init__(self):
+        super(Tuning,self).__init__()
+        self.classifier = nn.Sequential(
+                nn.Linear(512, 128),
+                nn.ReLU(inplace=True),
+                nn.Dropout(),
+                nn.Linear(128, 2),
+                nn.Softmax(dim=1)
 
     )
 
-  def forward(self,x):
+    def forward(self,x):
     x = resnet(x)
     x = self.classifier(x)
     return x
-  
+
 
 def get_id_emb(id_net, id_img_path):
     id_img = cv2.imread(id_img_path)
@@ -162,7 +164,7 @@ def faces_align_(target, image_path, image_size=224):
     return aligned_imgs
 
 
-def faces_align__(DL_path, image_path, image_size=224):
+def faces_align__(image_path, image_size=224):
     aligned_imgs =[]
     if os.path.isfile(image_path):
         img_list = [image_path]
@@ -170,7 +172,7 @@ def faces_align__(DL_path, image_path, image_size=224):
         img_list = [os.path.join(image_path, x) for x in os.listdir(image_path) if x.endswith('png') or x.endswith('jpg') or x.endswith('jpeg')]
     for path in img_list:
         img = cv2.imread(path)
-        landmarks = process_image_dl(img, DL_path)
+        landmarks = process_image_dl(img)
         for landmark in landmarks:
             if landmark is not None:
                 aligned_img, back_matrix = align_img(img, landmark, image_size)
@@ -182,7 +184,6 @@ def faces_align__(DL_path, image_path, image_size=224):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="MobileFaceSwap Test")
-    parser.add_argument('--pretrained_path', type=str, help='path to the pretrained model')
     parser.add_argument('--source_img_path', type=str, help='path to the source image')
     parser.add_argument('--target_img_path', type=str, help='path to the target images')
     parser.add_argument('--output_dir', type=str, default='results', help='path to the output dirs')
@@ -204,13 +205,11 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    DL_path = args.pretrained_path
-
     if args.need_align:
         landmarkModel = LandmarkModel(name='landmarks')
         landmarkModel.prepare(ctx_id= 0, det_thresh=0.6, det_size=(640,640))
         source_aligned_images = faces_align(landmarkModel, args.source_img_path)
-        target_aligned_images = faces_align__(DL_path, args.target_img_path, args.image_size)
+        target_aligned_images = faces_align__(args.target_img_path, args.image_size)
     os.makedirs(args.output_dir, exist_ok=True)
     image_test_multi_face(args, source_aligned_images, target_aligned_images)
 
