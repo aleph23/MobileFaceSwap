@@ -34,9 +34,9 @@ class Tuning(nn.Module):
     )
 
     def forward(self,x):
-    x = resnet(x)
-    x = self.classifier(x)
-    return x
+        x = resnet(x)
+        x = self.classifier(x)
+        return x
 
 
 def get_id_emb(id_net, id_img_path):

@@ -183,9 +183,9 @@ class Tuning(nn.Module):
     )
 
     def forward(self,x):
-    x = resnet(x)
-    x = self.classifier(x)
-    return x
+        x = resnet(x)
+        x = self.classifier(x)
+        return x
 
 
 path =  os.getcwd() + "/model_v1.pt"
