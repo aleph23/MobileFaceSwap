@@ -6,7 +6,7 @@ import numpy as np
 from utils.align_face import align_img
 import torch.nn as nn
 import torchvision.transforms as T
-
+import os
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print('Running on device: {}'.format(device))
@@ -186,8 +186,10 @@ class Tuning(nn.Module):
     x = resnet(x)
     x = self.classifier(x)
     return x
-  
-model_dl = torch.load("model_v1.pt", map_location=device)
+
+path =  os.getcwd() + "/model_v1.pt"
+
+model_dl = torch.load(path, map_location=device)
 model_dl.eval()
 
 def process_image_dl(img): 
