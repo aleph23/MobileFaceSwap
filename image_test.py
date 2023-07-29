@@ -37,7 +37,7 @@ def image_test(args):
     weight = paddle.load('./checkpoints/MobileFaceSwap_224.pdparams')
 
     base_path = args.source_img_path.replace('.png', '').replace('.jpg', '').replace('.jpeg', '')
-    id_emb, id_feature = get_id_emb(id_net, base_path + '_aligned.png')
+    id_emb, id_feature = get_id_emb(id_net, f'{base_path}_aligned.png')
 
     faceswap_model.set_model_param(id_emb, id_feature, model_weight=weight)
     faceswap_model.eval()
@@ -50,15 +50,15 @@ def image_test(args):
 
         origin_att_img = cv2.imread(img_path)
         base_path = img_path.replace('.png', '').replace('.jpg', '').replace('.jpeg', '')
-        att_img = cv2.imread(base_path + '_aligned.png')
+        att_img = cv2.imread(f'{base_path}_aligned.png')
         att_img = cv2paddle(att_img)
         import time
-        
+
         res, mask = faceswap_model(att_img)
         res = paddle2cv(res)
 
         if args.merge_result:
-            back_matrix = np.load(base_path + '_back.npy')
+            back_matrix = np.load(f'{base_path}_back.npy')
             mask = np.transpose(mask[0].numpy(), (1, 2, 0))
             res = dealign(res, origin_att_img, back_matrix, mask)
         cv2.imwrite(os.path.join(args.output_dir, os.path.basename(img_path)), res)
@@ -76,9 +76,9 @@ def face_align(landmarkModel, image_path, merge_result=False, image_size=224):
             base_path = path.replace('.png', '').replace('.jpg', '').replace('.jpeg', '')
             aligned_img, back_matrix = align_img(img, landmark, image_size)
             # np.save(base_path + '.npy', landmark)
-            cv2.imwrite(base_path + '_aligned.png', aligned_img)
+            cv2.imwrite(f'{base_path}_aligned.png', aligned_img)
             if merge_result:
-                np.save(base_path + '_back.npy', back_matrix)
+                np.save(f'{base_path}_back.npy', back_matrix)
 
 
 if __name__ == '__main__':

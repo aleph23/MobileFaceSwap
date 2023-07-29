@@ -98,9 +98,9 @@ def face_align(landmarkModel, image_path, merge_result=False, image_size=224):
             base_path = path.replace('.png', '').replace('.jpg', '').replace('.jpeg', '')
             aligned_img, back_matrix = align_img(img, landmark, image_size)
             # np.save(base_path + '.npy', landmark)
-            cv2.imwrite(base_path + '_aligned.png', aligned_img)
+            cv2.imwrite(f'{base_path}_aligned.png', aligned_img)
             if merge_result:
-                np.save(base_path + '_back.npy', back_matrix)
+                np.save(f'{base_path}_back.npy', back_matrix)
 
 def faces_align(landmarkModel, image_path, image_size=224):
     aligned_imgs =[]

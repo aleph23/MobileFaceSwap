@@ -66,7 +66,7 @@ class LandmarkModel():
             kps is the landmarks of the face with the highest detection score.
 
         '''
-    
+
         bboxes, kpss = self.det_model.detect(img, threshold=self.det_thresh, max_num=max_num, metric='default')
         if bboxes.shape[0] == 0:
             return None
@@ -75,10 +75,7 @@ class LandmarkModel():
         # select the face with the hightest detection score
         best_index = np.argmax(det_score)
 
-        kps = None
-        if kpss is not None:
-            kps = kpss[best_index]
-        return kps
+        return kpss[best_index] if kpss is not None else None
 
     def gets(self, img, max_num=0):
         '''gets method which is not used in this project. It is used to get all the landmarks in an image.'''
