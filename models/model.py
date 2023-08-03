@@ -65,17 +65,28 @@ class UNet(nn.Layer):
         ])
 
         mask_channel = [512, 128, 64, 32, 8, 2]
-        mask = []
-        for i in range(len(mask_channel)-1):
-            mask.append(nn.Sequential(
-                    nn.Upsample(scale_factor=2.0, align_corners=True, mode='bilinear'), 
-                    nn.Conv2D(mask_channel[i], mask_channel[i], kernel_size=3, stride=1, padding=1, groups=mask_channel[i]),
-                    nn.Conv2D(mask_channel[i], mask_channel[i+1], kernel_size=1, stride=1),
-                    nn.BatchNorm2D(mask_channel[i+1]), 
-                    nn.LeakyReLU(0.1)
-                ))
-        mask.append(nn.Conv2D(2, 1, kernel_size=3, stride=1, padding=1))
-        mask.append(nn.Sigmoid())
+        mask = [
+            nn.Sequential(
+                nn.Upsample(scale_factor=2.0, align_corners=True, mode='bilinear'),
+                nn.Conv2D(
+                    mask_channel[i],
+                    mask_channel[i],
+                    kernel_size=3,
+                    stride=1,
+                    padding=1,
+                    groups=mask_channel[i],
+                ),
+                nn.Conv2D(
+                    mask_channel[i], mask_channel[i + 1], kernel_size=1, stride=1
+                ),
+                nn.BatchNorm2D(mask_channel[i + 1]),
+                nn.LeakyReLU(0.1),
+            )
+            for i in range(len(mask_channel) - 1)
+        ]
+        mask.extend(
+            (nn.Conv2D(2, 1, kernel_size=3, stride=1, padding=1), nn.Sigmoid())
+        )
         self.mask = nn.Sequential(*mask)
 
         self.relu = nn.LeakyReLU(0.1)
@@ -115,7 +126,7 @@ class BuildFaceSwap(nn.Layer):
 
         self.Decoder_inchannel = [1024//encoder_scale, 1024//encoder_scale, 512//encoder_scale, 256//encoder_scale]
         self.Decoder_outchannel = [512//encoder_scale, 256//encoder_scale, 128//encoder_scale, 64//encoder_scale]
-        
+
         self.DecoderModulation = nn.LayerList()
         for i in range(len(self.Decoder_inchannel)):
             self.DecoderModulation.append(Mod2Weight(self.Decoder_inchannel[i], self.Decoder_outchannel[i]))
@@ -138,31 +149,42 @@ class BuildFaceSwap(nn.Layer):
 
 
         mask_channel = [1024//encoder_scale, 256//encoder_scale, 128//encoder_scale, 64//encoder_scale, 16//encoder_scale, 4//encoder_scale]
-        mask = []
-        for i in range(len(mask_channel)-1):
-            mask.append(nn.Sequential(
-                    nn.Upsample(scale_factor=2.0, align_corners=True, mode='bilinear'), 
-                    nn.Conv2D(mask_channel[i], mask_channel[i], kernel_size=3, stride=1, padding=1, groups=mask_channel[i]),
-                    nn.Conv2D(mask_channel[i], mask_channel[i+1], kernel_size=1, stride=1),
-                    nn.BatchNorm2D(mask_channel[i+1]), 
-                    nn.LeakyReLU(0.1)
-                ))
-        mask.append(nn.Conv2D(2, 1, kernel_size=3, stride=1, padding=1))
-        mask.append(nn.Sigmoid())
+        mask = [
+            nn.Sequential(
+                nn.Upsample(scale_factor=2.0, align_corners=True, mode='bilinear'),
+                nn.Conv2D(
+                    mask_channel[i],
+                    mask_channel[i],
+                    kernel_size=3,
+                    stride=1,
+                    padding=1,
+                    groups=mask_channel[i],
+                ),
+                nn.Conv2D(
+                    mask_channel[i], mask_channel[i + 1], kernel_size=1, stride=1
+                ),
+                nn.BatchNorm2D(mask_channel[i + 1]),
+                nn.LeakyReLU(0.1),
+            )
+            for i in range(len(mask_channel) - 1)
+        ]
+        mask.extend(
+            (nn.Conv2D(2, 1, kernel_size=3, stride=1, padding=1), nn.Sigmoid())
+        )
         self.mask = nn.Sequential(*mask)
 
 
     def forward(self, id_emb, id_feature_map):
         weights_encoder, weights_decoder = self.predictor(id_feature_map)
 
-        encode_mod = []
-        decode_mod = []
-        for i in range(len(self.EncoderModulation)):
-            encode_mod.append(self.EncoderModulation[i](id_emb))
-
-        for i in range(len(self.DecoderModulation)):
-            decode_mod.append(self.DecoderModulation[i](id_emb))
-
+        encode_mod = [
+            self.EncoderModulation[i](id_emb)
+            for i in range(len(self.EncoderModulation))
+        ]
+        decode_mod = [
+            self.DecoderModulation[i](id_emb)
+            for i in range(len(self.DecoderModulation))
+        ]
         return weights_encoder, weights_decoder, encode_mod, decode_mod
 
 
@@ -250,5 +272,4 @@ class ConvBlock(nn.Layer):
 
 def l2_norm(input,axis=1):
     norm = paddle.norm(input,2,axis,True)
-    output = paddle.divide(input, norm)
-    return output
+    return paddle.divide(input, norm)

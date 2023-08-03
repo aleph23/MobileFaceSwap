@@ -68,7 +68,7 @@ def video_test(args):
     cap.open(args.target_video_path)
     videoWriter = cv2.VideoWriter(os.path.join(args.output_path, os.path.basename(args.target_video_path)), fourcc, int(cap.get(cv2.CAP_PROP_FPS)), (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))
     all_f = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-    for i in tqdm(range(int(all_f))):
+    for _ in tqdm(range(int(all_f))):
         ret, frame = cap.read()
         landmark = landmarkModel.get(frame)
         if landmark is not None:

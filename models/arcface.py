@@ -93,12 +93,12 @@ class ResNet(nn.Layer):
                 nn.BatchNorm2D(planes * block.expansion),
             )
 
-        layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample, use_se=self.use_se))
+        layers = [block(self.inplanes, planes, stride, downsample, use_se=self.use_se)]
         self.inplanes = planes
-        for i in range(1, blocks):
-            layers.append(block(self.inplanes, planes, use_se=self.use_se))
-
+        layers.extend(
+            block(self.inplanes, planes, use_se=self.use_se)
+            for _ in range(1, blocks)
+        )
         return nn.Sequential(*layers)
 
     def forward(self, x):

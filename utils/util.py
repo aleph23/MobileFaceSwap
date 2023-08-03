@@ -30,5 +30,4 @@ def paddle2cv(img):
     img = img.numpy()[0]
     img = np.transpose(img, (1, 2, 0))
     img *= 255
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-    return img
+    return cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
