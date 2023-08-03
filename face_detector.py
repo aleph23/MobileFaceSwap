@@ -84,11 +84,11 @@ class YoloDetector:
                 bboxes: list of arrays with 4 coordinates of bounding boxes with format x1,y1,x2,y2.
                 points: list of arrays with coordinates of 5 facial keypoints (eyes, nose, lips corners).
         """
-        bboxes = [[] for i in range(len(origimgs))]
-        landmarks = [[] for i in range(len(origimgs))]
-        
+        bboxes = [[] for _ in range(len(origimgs))]
+        landmarks = [[] for _ in range(len(origimgs))]
+
         pred = non_max_suppression_face(pred, conf_thres, iou_thres)
-        
+
         for i in range(len(origimgs)):
             img_shape = origimgs[i].shape
             h,w = img_shape[:2]
@@ -117,16 +117,13 @@ class YoloDetector:
                 True if face is frontal, False otherwise.
         '''
         cur_points = points.astype('int')
-        x1, y1, x2, y2 = box[0:4]
+        x1, y1, x2, y2 = box[:4]
         w = x2-x1
         h = y2-y1
         diag = sqrt(w**2+h**2)
         dist = scipy.spatial.distance.pdist(cur_points)/diag
         predict = self.anti_profile.predict(dist.reshape(1, -1))[0]
-        if predict == 0:
-            return True
-        else:
-            return False
+        return predict == 0
     def align(self, img, points):
         '''
             Align faces, found on images.
@@ -136,8 +133,7 @@ class YoloDetector:
             Returns:
                 crops: list of croped and aligned faces of shape (112,112,3).
         '''
-        crops = [align_faces(img,landmark=np.array(i)) for i in points]
-        return crops
+        return [align_faces(img,landmark=np.array(i)) for i in points]
 
     def predict(self, imgs, conf_thres = 0.3, iou_thres = 0.5):
         '''
@@ -160,14 +156,16 @@ class YoloDetector:
             shapes = {arr.shape for arr in images}
             if len(shapes) != 1:
                 one_by_one = True
-                warnings.warn(f"Can't use batch predict due to different shapes of input images. Using one by one strategy.")
+                warnings.warn(
+                    "Can't use batch predict due to different shapes of input images. Using one by one strategy."
+                )
         origimgs = copy.deepcopy(images)
-        
-        
+
+
         if one_by_one:
             images = [self._preprocess([img]) for img in images]
-            bboxes = [[] for i in range(len(origimgs))]
-            points = [[] for i in range(len(origimgs))]
+            bboxes = [[] for _ in range(len(origimgs))]
+            points = [[] for _ in range(len(origimgs))]
             for num, img in enumerate(images):
                 with torch.inference_mode(): # change this with torch.no_grad() for pytorch <1.8 compatibility
                     single_pred = self.detector(img)[0]

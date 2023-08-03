@@ -9,7 +9,7 @@ import torchvision.transforms as T
 import os
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-print('Running on device: {}'.format(device))
+print(f'Running on device: {device}')
 
 resnet = InceptionResnetV1(pretrained='vggface2', device=device).eval()
 model = YoloDetector(target_size = 720, device = "cuda:0",min_face = 20)
@@ -34,14 +34,14 @@ def detection(img, show=False, save_path=None, img_num=None):
   # show pictures
   if show == True:
     for face in faces:
-      cv2_imshow(face)  
+      cv2_imshow(face)
   # save pictures
   if save_path != None:
     for i in range(len(faces)):
       img = faces[i]
       img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
       img = Image.fromarray(img)
-      img.save(save_path + f'/crop{img_num}_{i}.png')     
+      img.save(f'{save_path}/crop{img_num}_{i}.png')
   # Reshape tensor for resnet module
   faces = torch.tensor(faces)
   if faces.dim() == 4:
@@ -53,9 +53,8 @@ def detection(img, show=False, save_path=None, img_num=None):
     return None, None, None
 
 def get_embeddings(faces):
-    faces = faces.to(device)
-    unknown_embeddings = resnet(faces).detach().cpu()
-    return unknown_embeddings
+  faces = faces.to(device)
+  return resnet(faces).detach().cpu()
 
 def recognition(face_db, unknown_embeddings, recog_thr) : 
     face_ids = []
@@ -145,22 +144,17 @@ def preprocess(img, target, recog_thr, version) :
 
 
 def k(img, points, face_ids):
-  point_list = []
-
-  for (point, face_id) in zip(points, face_ids):
-    if face_id == 'unknown':
-        point_list.append(point)
-
-  point_list = np.array(point_list)  
+  point_list = [
+      point for point, face_id in zip(points, face_ids) if face_id == 'unknown'
+  ]
+  point_list = np.array(point_list)
   return point_list
 
 
 def process_image(img, target, recog_thr=0.4, version=1, view_sim=False): 
-    _, _, points = detection(img)
-    face_ids, _ = preprocess(img, target, recog_thr, version)
-    result = k(img, points[0], face_ids)
-
-    return result
+  _, _, points = detection(img)
+  face_ids, _ = preprocess(img, target, recog_thr, version)
+  return k(img, points[0], face_ids)
 
 
 
@@ -188,38 +182,35 @@ class Tuning(nn.Module):
         return x
 
 
-path =  os.getcwd() + "/model_v1.pt"
+path = f"{os.getcwd()}/model_v1.pt"
 
 model_dl = torch.load(path, map_location=device)
 model_dl.eval()
 
 def process_image_dl(img): 
-    data_transform = T.Compose([
-        T.ToTensor(),
-        T.Resize(244),
-        T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-    
-    imgs, _, points = detection(img)
-    crop_img_list = []
-    for i in imgs:
-      i = T.ToPILImage()(i)
-      crop_img_list.append(data_transform(i))
+  data_transform = T.Compose([
+      T.ToTensor(),
+      T.Resize(244),
+      T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+  ])
 
-    crop_img_tensor = torch.stack(crop_img_list, dim=0)
-    crop_img_tensor = crop_img_tensor.to(device)
-    output = model_dl(crop_img_tensor)
-    max_row_index = torch.argmax(output[:, 0])
+  imgs, _, points = detection(img)
+  crop_img_list = []
+  for i in imgs:
+    i = T.ToPILImage()(i)
+    crop_img_list.append(data_transform(i))
 
-    face_ids = []
+  crop_img_tensor = torch.stack(crop_img_list, dim=0)
+  crop_img_tensor = crop_img_tensor.to(device)
+  output = model_dl(crop_img_tensor)
+  max_row_index = torch.argmax(output[:, 0])
 
-    for i in range(len(output)):
-      if i != max_row_index:
-        face_ids.append("unknown")
-      if i == max_row_index:
-        face_ids.append("charm_zu")
+  face_ids = []
 
-    result = k(img, points[0], face_ids)
+  for i in range(len(output)):
+    if i != max_row_index:
+      face_ids.append("unknown")
+    if i == max_row_index:
+      face_ids.append("charm_zu")
 
-
-    return result
+  return k(img, points[0], face_ids)
