@@ -13,14 +13,11 @@ def align_faces(img, bbox=None, landmark=None, **kwargs):
         src[:,0] += 8.0
         dst = landmark.astype(np.float32)
         M = cv2.estimateAffine2D(dst,src)[0]
-        warped = cv2.warpAffine(img,M,(112,112), borderValue = 0.0)
-        return warped
-    
+        return cv2.warpAffine(img,M,(112,112), borderValue = 0.0)
     # If no landmark points available, do alignment using bounding box. If no bounding box available use center crop
     if M is None:
         x1,y1,x2,y2,_ = bbox
         ret = img[y1:y2,x1:x2]
-        ret = cv2.resize(ret, (112,112))
-        return ret
+        return cv2.resize(ret, (112,112))
 def face_distance(vec1,vec2):
     return np.dot(vec1, vec2.T)
